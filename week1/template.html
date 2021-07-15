@@ -24,78 +24,81 @@
           <button
             type="button"
             class="btn btn-outline-primary"
+            @click="randomResolution"
           >
             切換大頭貼解析度
           </button>
           現在圖片解析度：
-          <span>清晰</span>
+          <span>{{ currentResolution.label }}</span>
         </div>
-        <div class="row">
-          <div class="col-md-4 mb-3">
-            <div class="card h-100">
-              <div class="position-absolute" style="top: 20px; right: 20px">
-                <button
-                  type="button"
-                  class="btn btn-outline-danger rounded-pill"
-                >
-                  <i class="bi bi-heart fs-5"></i>
-                </button>
-              </div>
-              <img
-                src="https://randomuser.me/api/portraits/men/24.jpg"
-                class="card-img-top"
-              />
-              <div class="card-body">
-                <h5 class="card-title">
-                  Monsieur Jérôme Clement( <span>👨</span> )
-                </h5>
-                <p class="card-text">
-                  Email：<a href="mailto:jerome.clement@example.com"
-                    >jerome.clement@example.com</a
+        <div class="row" >
+          <template v-for="user in randomUser" >
+            <div class="col-md-4 mb-3">
+              <div class="card h-100">
+                <div class="position-absolute" style="top: 20px; right: 20px">
+                  <button
+                    type="button"
+                    class="btn btn-outline-danger rounded-pill"
                   >
-                </p>
-                <p class="card-text">
-                  Phone: <a href="tel:077 857 10 09">077 857 10 09</a>
-                </p>
-                <p class="card-text">
-                  Cell: <a href="tel:075 491 99 85">075 491 99 85</a>
-                </p>
-                <p class="card-text">City: Châtillon (Ju)</p>
-                <p class="card-text">State: Graubünden</p>
-                <p class="card-text">Country: Switzerland</p>
-                <p class="card-text">Postcode: 6560</p>
-                <p>
-                  Address：<a
-                    href="https://www.google.com.tw/maps/search/Châtillon (Ju)Graubünden"
-                    target="_blank"
-                    >Châtillon (Ju) Graubünden Switzerland 6560</a
-                  >
-                </p>
-                <p class="card-text">
-                  description: Bombay, Calcutta, Madras, New Delhi
-                </p>
-                <p class="card-text">
-                  <small class="text-muted"
-                    >dob：1965-03-08T06:47:08.901Z</small
-                  >
-                </p>
-                <p class="card-text">
-                  <small class="text-muted"
-                    >registered：2016-03-08T06:04:55.159Z</small
-                  >
-                </p>
-                <iframe
-                  width="100%"
-                  height="300"
-                  frameborder="0"
-                  scrolling="no"
-                  marginheight="0"
-                  marginwidth="0"
-                  src="https://maps.google.com.tw/maps?f=q&amp;hl=zh-TW&amp;geocode=&amp;q=-50.7880,-14.1043&amp;z=10&amp;output=embed"
-                ></iframe>
+                    <i class="bi bi-heart fs-5"></i>
+                  </button>
+                </div>
+                <img
+                  :src="user.picture[currentResolution.value]"
+                  class="card-img-top"
+                />
+                <div class="card-body">
+                  <h5 class="card-title">
+                    {{ user.name.first + ' ' + user.name.last }}( <span v-if="user.gender === 'male'">👨</span><span v-else>👩</span> )
+                  </h5>
+                  <p class="card-text">
+                    Email：<a :href="'mailto:' + user.email"
+                      >{{ user.email }}</a
+                    >
+                  </p>
+                  <p class="card-text">
+                    Phone: <a href="'tel:' + user.phone">{{ user.phone }}</a>
+                  </p>
+                  <p class="card-text">
+                    Cell: <a href="'tel:' + user.cell">{{ user.cell }}</a>
+                  </p>
+                  <p class="card-text">City: {{ user.location.city }}</p>
+                  <p class="card-text">State: {{ user.location.state }}</p>
+                  <p class="card-text">Country: {{ user.location.country }}</p>
+                  <p class="card-text">Postcode: {{ user.location.postcode }}</p>
+                  <p>
+                    Address：<a
+                      :href="'https://www.google.com.tw/maps/search/' + user.location.city + ' ' + user.location.state + ' '+ user.location.country + ' ' + user.location.postcode"
+                      target="_blank"
+                      >{{ user.location.city + ' ' + user.location.state + ' '+ user.location.country + ' ' + user.location.postcode }}</a
+                    >
+                  </p>
+                  <p class="card-text">
+                    description: Bombay, Calcutta, Madras, New Delhi
+                  </p>
+                  <p class="card-text">
+                    <small class="text-muted"
+                      >dob：{{ user.dob.date }}</small
+                    >
+                  </p>
+                  <p class="card-text">
+                    <small class="text-muted"
+                      >registered：{{ user.registered.date }}</small
+                    >
+                  </p>
+                  <iframe
+                    width="100%"
+                    height="300"
+                    frameborder="0"
+                    scrolling="no"
+                    marginheight="0"
+                    marginwidth="0"
+                    :src="'https://maps.google.com.tw/maps?f=q&amp;hl=zh-TW&amp;geocode=&amp;q=' + user.location.coordinates.latitude + ',' + user.location.coordinates.longitude +'&amp;z=10&amp;output=embed'"
+                  ></iframe>
+                </div>
               </div>
             </div>
-          </div>
+          </template>
         </div>
       </div>
     </div>
@@ -105,9 +108,59 @@
       crossorigin="anonymous"
     ></script>
     <script src="https://unpkg.com/vue@next"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="data.js"></script>
     <script>
-      console.log(results);
+      // import axios from 'axios'
+      Vue.createApp({
+        data () {
+          return {
+            randomUser: [],
+            resolution: [
+              {
+                label: '清晰',
+                value: 'large'
+              },
+              {
+                label: '一般',
+                value: 'medium'
+              },
+              {
+                label: '低解析',
+                value: 'thumbnail'
+              }
+            ],
+            currentResolution: {
+              label: '清晰',
+              value: 'large'
+            }
+          }
+        },
+        methods: {
+          randomResolution () {
+            const random = Math.floor(Math.random() * this.resolution.length)
+            this.currentResolution = this.resolution[random]
+          },
+          async getData () {
+            console.log(axios)
+            const data = await axios.get('https://randomuser.me/api/?results=10').then(res => {
+              if (res.data) {
+                this.randomUser = res.data.results
+                console.log(this.randomUser)
+              }
+            })
+
+            // if (data && data.results) {
+            //   this.randomUser = data.results
+            //   console.log(this.randomUser)
+            // }
+          }
+        },
+        async mounted () {
+          await this.getData()
+          console.log(this.randomUser)
+        }
+      }).mount('#app')
     </script>
   </body>
 </html>
